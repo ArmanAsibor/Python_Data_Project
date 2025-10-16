@@ -127,7 +127,7 @@ plt.show()
 
 ## 9. Results (Interpretation)
 
-![Visualisation of the chart](2_Project\images\skill_demand_percentage.png)
+![Visualisation of the chart](2_Project/images/skill_demand_percentage.png)
 
 
 Data Analyst → SQL and Excel dominate; BI tools (Tableau, Power BI) follow.
