@@ -1,4 +1,4 @@
-# Skill Frequency & Importance in UK Data Roles
+# 1) Skill Frequency & Importance in UK Data Roles
 _Notebook: `2_Project/02.Skill_Count.ipynb`_
 
 This notebook analyzes **UK job postings** for data roles to identify the most requested skills.  
