@@ -138,5 +138,130 @@ Data Engineer → SQL, Python, Spark, and cloud data tools are most common.
 
 The percentages represent how likely a skill is to appear in postings for a given role.
 
-# 2) In-demand skills trending for Data Engineers
 
+# 2) In-demand Skills Trending for Data Engineers
+_Notebook: `2_Project/03.Skills_Trend.ipynb`_
+
+This notebook focuses exclusively on **Data Engineer** roles to explore which skills are **gaining the most traction over time** in the UK job market.  
+It builds upon the previous analysis of overall skill frequency by adding a **time dimension**, allowing us to track how demand for specific technologies has evolved.
+
+---
+
+## 1. Imports and Theme
+
+We import the same Python libraries for consistency and set Seaborn’s theme for visualization.
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datasets import load_dataset
+import ast
+
+
+```
+## 2. Load and Prepare Data
+
+The dataset used is again from Hugging Face (lukebarousse/data_jobs) and loaded into a pandas DataFrame.
+We filter the dataset to include only Data Engineer roles in the United Kingdom.
+
+```python
+dataset = load_dataset("lukebarousse/data_jobs")
+df = pd.DataFrame(dataset['train'])
+
+df["job_posted_date"] = pd.to_datetime(df["job_posted_date"])
+df["job_skills"] = df["job_skills"].apply(lambda s: ast.literal_eval(s) if pd.notna(s) else s)
+
+df_UK = df[df["job_country"] == "United Kingdom"]
+df_DE = df_UK[df_UK["job_title_short"] == "Data Engineer"]
+```
+
+## 3. Extract Skills Over Time
+
+To see trends, we focus on when skills were mentioned in postings.
+We use the posting date to track changes and group data by both skill and time period.
+
+```python
+df_explode = df_DE.explode("job_skills")
+df_explode["month_year"] = df_explode["job_posted_date"].dt.to_period("M")
+
+df_trend = (
+    df_explode.groupby(["month_year", "job_skills"])["job_id"]
+    .nunique()
+    .reset_index(name="postings")
+)
+```
+
+## 4. Filter and Calculate Percentages
+
+We calculate how often each skill appears in a given month relative to all Data Engineer postings.
+
+```python
+monthly_totals = (
+    df_explode.groupby("month_year")["job_id"]
+    .nunique()
+    .rename("total_jobs")
+    .reset_index()
+)
+
+df_trend = (
+    df_trend.merge(monthly_totals, on="month_year")
+    .assign(skill_percentage=lambda d: 100 * d["postings"] / d["total_jobs"])
+)
+
+```
+
+## 5. Select Top Skills
+
+We select only the most frequent skills over the entire time range, keeping the top 10 for clarity in visualization.
+
+```python
+top_skills = (
+    df_trend.groupby("job_skills")["postings"].sum()
+    .sort_values(ascending=False)
+    .head(10)
+    .index
+)
+
+df_top_trend = df_trend[df_trend["job_skills"].isin(top_skills)]
+
+```
+
+## 6. Plot Trends Over Time
+
+We visualize how these top 10 skills have changed in popularity across months.
+A line chart shows which technologies are gaining or losing traction.
+
+```python
+plt.figure(figsize=(12,6))
+sns.lineplot(
+    data=df_top_trend,
+    x="month_year",
+    y="skill_percentage",
+    hue="job_skills",
+    linewidth=2.5
+)
+
+plt.title("In-demand Skills Trending for Data Engineers", fontsize=14)
+plt.ylabel("Percentage of Job Postings Mentioning Skill (%)")
+plt.xlabel("Month-Year")
+plt.xticks(rotation=45)
+plt.legend(title="Skill", bbox_to_anchor=(1.05, 1), loc="upper left")
+plt.tight_layout()
+plt.show()
+
+```
+
+## 7. Results (Interpretation)
+
+![Visualisation of the chart](2_Project/images/skill_trend_perc.png)
+
+SQL and Python maintain a steady lead as essential foundation skills.
+
+AWS and Azure show a sharp upward trend, reflecting the increasing demand for cloud-based data engineering.
+
+Spark remains a consistent presence due to large-scale data pipeline needs.
+
+Emerging tools like Airflow and Databricks show growing relevance over the months.
+
+This visualization gives a time-aware view of the evolving Data Engineer skill ecosystem, helping identify not just what’s important now, but what’s rising next.
