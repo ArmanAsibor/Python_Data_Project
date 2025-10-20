@@ -1,4 +1,4 @@
-# 📊 Project Overview and Conclusion
+# 📊 Project Overview
 
 This project provides a comprehensive, data-driven overview of the **UK data job market**, focusing on the **skills, trends, and salaries** that define modern data roles.  
 Using the `lukebarousse/data_jobs` dataset, the analysis was structured into three interconnected notebooks:
