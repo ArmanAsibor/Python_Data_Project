@@ -1,5 +1,27 @@
+# 📊 Project Overview and Conclusion
+
+This project provides a comprehensive, data-driven overview of the **UK data job market**, focusing on the **skills, trends, and salaries** that define modern data roles.  
+Using the `lukebarousse/data_jobs` dataset, the analysis was structured into three interconnected notebooks:
+
+1. **Skill Frequency & Importance in UK Data Roles**  
+   - Identified which skills are most in-demand across Data Analyst, Data Scientist, and Data Engineer positions.  
+   - SQL and Python consistently dominate, with BI tools (Tableau, Power BI) and cloud technologies following closely.
+
+2. **In-demand Skills Trending for Data Engineers**  
+   - Focused specifically on Data Engineers, revealing how the demand for technologies such as **AWS**, **Azure**, and **Airflow** is rapidly rising.  
+   - Highlighted the evolution of the role towards scalable, cloud-based infrastructure and automation.
+
+3. **Salary Analysis for Data Roles**  
+   - Explored salary patterns to show which roles and skills offer the highest earning potential.  
+   - Data Engineers and Data Scientists lead in compensation, particularly when equipped with **cloud** and **Big Data** expertise.
+
+---
+
+
+
+
 # 1) Skill Frequency & Importance in UK Data Roles
-_Notebook: `2_Project/02.Skill_Count.ipynb`_
+_Notebook: [2.Skill_Count](2_Project/02.Skill_Count.ipynb)_
 
 This notebook analyzes **UK job postings** for data roles to identify the most requested skills.  
 It calculates the **percentage of postings mentioning each skill** and plots the Top skills per role.
@@ -140,7 +162,7 @@ The percentages represent how likely a skill is to appear in postings for a give
 
 
 # 2) In-demand Skills Trending for Data Engineers
-_Notebook: `2_Project/03.Skills_Trend.ipynb`_
+_Notebook: [03.Skills_Trend](2_Project/03.Skills_Trend.ipynb)_
 
 This notebook focuses exclusively on **Data Engineer** roles to explore which skills are **gaining the most traction over time** in the UK job market.  
 It builds upon the previous analysis of overall skill frequency by adding a **time dimension**, allowing us to track how demand for specific technologies has evolved.
@@ -267,3 +289,160 @@ Spark remains a consistent presence due to large-scale data pipeline needs.
 Emerging tools like Airflow and Databricks show growing relevance over the months.
 
 This visualization gives a time-aware view of the evolving Data Engineer skill ecosystem, helping identify not just what’s important now, but what’s rising next.
+
+
+
+# 3) Salary Analysis for Data Roles
+_Notebook: [04.Salary_Analysis](2_Project/04.Salary_Analysis.ipynb)_
+
+This notebook investigates **salary trends across data-related job roles in the UK**, including Data Engineer, Data Scientist, and Data Analyst.  
+It explores how salaries vary by role, skill, and time — providing insights into **which data roles and skills offer the highest pay**.
+
+---
+
+## 1. Imports and Theme
+
+We import the necessary Python libraries for data analysis and visualization, and apply Seaborn’s clean notebook theme.
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datasets import load_dataset
+import ast
+```
+
+## 2. Load Dataset and Cleaning data 
+
+We load the job postings dataset from Hugging Face (lukebarousse/data_jobs) and convert it into a pandas DataFrame.
+Dates are converted to proper datetime objects, and the job_skills column is transformed from string to list format.
+
+```python
+dataset = load_dataset("lukebarousse/data_jobs")
+df = pd.DataFrame(dataset['train'])
+
+df["job_posted_date"] = pd.to_datetime(df["job_posted_date"])
+df["job_skills"] = df["job_skills"].apply(lambda s: ast.literal_eval(s) if pd.notna(s) else s)
+```
+
+
+## 3.Salary Data Preparation
+
+We focus only on postings that contain salary information.
+The median salary for each job role is calculated to avoid distortion by outliers.
+
+```python 
+df_salary = df_UK[df_UK["salary_year_avg"].notnull()]
+df_salary_role = (
+    df_salary.groupby("job_title_short")["salary_year_avg"]
+    .median()
+    .reset_index()
+    .sort_values("salary_year_avg", ascending=False)
+)
+```
+
+## 4.Visualize Median Salary per Role
+
+A horizontal bar chart displays the median annual salary by role, showing which positions offer the highest pay.
+
+```python
+plt.figure(figsize=(8,5))
+sns.barplot(
+    data=df_salary_role,
+    x="salary_year_avg",
+    y="job_title_short",
+    palette="dark:b_r"
+)
+plt.title("Median Annual Salary by Data Role (UK)", fontsize=14)
+plt.xlabel("Median Salary (£ per year)")
+plt.ylabel("")
+plt.tight_layout()
+plt.show()
+```
+
+## 5.Salary by Skill (Optional Extension)
+
+To uncover which skills command higher salaries, we merge skill data and calculate the median salary associated with each skill.
+
+```python
+df_explode = df_salary.explode("job_skills")
+
+df_skill_salary = (
+    df_explode.groupby("job_skills")["salary_year_avg"]
+    .median()
+    .reset_index()
+    .sort_values("salary_year_avg", ascending=False)
+)
+```
+We then plot the Top 10 highest-paying skills.
+
+```python
+top_skills = df_skill_salary.head(10)
+
+plt.figure(figsize=(8,5))
+sns.barplot(
+    data=top_skills,
+    x="salary_year_avg",
+    y="job_skills",
+    palette="flare"
+)
+plt.title("Top 10 Highest-Paying Skills in UK Data Roles", fontsize=14)
+plt.xlabel("Median Salary (£ per year)")
+plt.ylabel("")
+plt.tight_layout()
+plt.show()
+```
+
+## 6. Results (Interpretation)
+
+![Visualisation of the chart](2_Project/images/data_jobs_boxplot.png)
+
+Data Engineers and Data Scientists consistently offer higher median salaries than Data Analysts.
+
+Cloud skills (AWS, Azure) and Big Data frameworks (Spark, Hadoop) are strongly associated with higher pay.
+
+Python and SQL, while common, still appear among well-paying roles due to their fundamental importance.
+
+The salary gap reflects both technical depth and infrastructure complexity in different roles.
+
+## 7.Insights Summary
+| Finding                                     | Interpretation                                                     |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| **Data Engineer earns the most**            | Reflects growing importance of infrastructure and pipeline design. |
+| **Cloud technologies boost pay**            | AWS, Azure, and GCP are key salary drivers.                        |
+| **Programming skills stay relevant**        | Python and SQL remain essential across all roles.                  |
+| **Machine learning frameworks add premium** | Tools like TensorFlow, PyTorch increase pay for data scientists.   |
+
+
+## 9. Conclusion
+
+This salary analysis highlights the financial landscape of UK data careers.
+Those looking to maximize earning potential should focus on mastering:
+
+- Cloud data infrastructure (AWS, Azure)
+
+- Big Data and ETL tools (Spark, Airflow)
+
+- Strong fundamentals (SQL, Python)
+
+Together, these skills align with both high-demand and high-paying opportunities in the data industry.
+
+
+# 💡 Key Insights
+
+- **SQL and Python** are universal essentials, the foundation of all data roles.  
+- **Cloud proficiency (AWS, Azure, GCP)** has become a major differentiator in both hiring and salary growth.  
+- **Big Data tools (Spark, Hadoop, Databricks)** remain highly relevant for handling large-scale infrastructure.  
+- **Data Engineers** represent the most technically complex and well-compensated roles, reflecting the industry’s shift towards scalable data ecosystems.
+
+
+# 🧭 Final Conclusion
+
+The UK data industry is evolving rapidly, emphasizing the intersection of **data management, cloud engineering, and automation**.  
+Professionals aiming to stay competitive should cultivate a balanced skill set, blending core analytical tools (Python, SQL) with modern infrastructure knowledge (AWS, Spark, Airflow).
+
+By combining insights from skill frequency, trend progression, and salary analysis, this project offers a clear picture of where the data landscape is heading, and which skills will define its future.
+
+---
+
+📘 *All notebooks are available in the `1_Advanced` and `2_Project` folders for detailed exploration and reproducibility.*
