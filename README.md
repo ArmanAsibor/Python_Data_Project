@@ -137,3 +137,6 @@ Data Scientist → Python is strongest; ML libraries and SQL also rank high.
 Data Engineer → SQL, Python, Spark, and cloud data tools are most common.
 
 The percentages represent how likely a skill is to appear in postings for a given role.
+
+# 2) In-demand skills trending for Data Engineers
+
