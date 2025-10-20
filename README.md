@@ -445,4 +445,4 @@ By combining insights from skill frequency, trend progression, and salary analys
 
 ---
 
-📘 *All notebooks are available in the `1_Advanced` and `2_Project` folders for detailed exploration and reproducibility.*
+📘 *All notebooks are available in the [`1_Advanced`](1_Advanced) and [`2_Project](2_Project) folders for detailed exploration and reproducibility.*
