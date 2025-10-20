@@ -233,22 +233,24 @@ We visualize how these top 10 skills have changed in popularity across months.
 A line chart shows which technologies are gaining or losing traction.
 
 ```python
-plt.figure(figsize=(12,6))
-sns.lineplot(
-    data=df_top_trend,
-    x="month_year",
-    y="skill_percentage",
-    hue="job_skills",
-    linewidth=2.5
-)
+df_plot = df_DE_UK_perc.iloc[:, :5]
 
-plt.title("In-demand Skills Trending for Data Engineers", fontsize=14)
-plt.ylabel("Percentage of Job Postings Mentioning Skill (%)")
-plt.xlabel("Month-Year")
-plt.xticks(rotation=45)
-plt.legend(title="Skill", bbox_to_anchor=(1.05, 1), loc="upper left")
-plt.tight_layout()
-plt.show()
+sns.lineplot(data=df_plot, dashes=False,palette="tab10")
+sns.set_theme(style="ticks")
+sns.despine()
+
+
+plt.title('Top 5 Skills Trend for Data Engineers in the UK')
+plt.xlabel('2023')
+plt.ylabel('Likelihood of Skill Mentioned')
+plt.legend().remove()
+
+
+ax = plt.gca()
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.0f}%'.format(y)))
+
+for i in range(5):
+    plt.text(11.2, df_plot.iloc[-1, i], df_plot.columns[i])
 
 ```
 
